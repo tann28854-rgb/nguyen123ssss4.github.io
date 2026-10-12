@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cute Web Quiz 5 Câu</title>
+
+    <!-- FONT CHỮ CUTE -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Mali', cursive, sans-serif;
+            background-color: #e2f0d9;
+            background-image: radial-gradient(#b8e0d2 2px, transparent 2px);
+            background-size: 24px 24px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: #2b3a42;
+        }
+
+        .card {
+            background-color: #ffffff;
+            padding: 35px 30px;
+            border-radius: 28px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            border: 4px solid #ffffff;
+            text-align: center;
+            min-width: 360px;
+            min-height: 240px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            width: 100px;
+            height: 28px;
+            background-color: rgba(255, 182, 193, 0.8);
+            transform: rotate(-3deg);
+            border-radius: 4px;
+        }
+
+        /* Màn hình chung */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            width: 100%;
+        }
+
+        .active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .fade-out {
+            opacity: 0 !important;
+        }
+
+        /* Loading & Chào tên */
+        .greeting-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ff6b81;
+            margin-bottom: -5px;
+        }
+
+        .loading-text {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: bounce 1.2s infinite ease-in-out;
+        }
+
+        .dot:nth-child(1) { background-color: #ff9aa2; animation-delay: 0s; }
+        .dot:nth-child(2) { background-color: #ffdac1; animation-delay: 0.2s; }
+        .dot:nth-child(3) { background-color: #e2f0d9; animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+        }
+
+        /* Nút và Input */
+        .name-input {
+            font-family: 'Mali', cursive, sans-serif;
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            border: 3px solid #ffd3e2;
+            border-radius: 20px;
+            outline: none;
+            text-align: center;
+            width: 80%;
+            color: #2b3a42;
+        }
+
+        .name-input:focus {
+            border-color: #ff9aa2;
+        }
+
+        .btn-cute {
+            font-family: 'Mali', cursive, sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            background: linear-gradient(135deg, #ff9aa2, #ffb7b2);
+            border: 3px solid #ffffff;
+            padding: 10px 32px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(255, 154, 162, 0.4);
+            transition: transform 0.2s;
+            outline: none;
+        }
+
+        .btn-cute:hover {
+            transform: scale(1.08);
+        }
+
+        /* Phần Câu hỏi & Ảnh */
+        .question-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ff80bf;
+            margin-bottom: 5px;
+        }
+
+        .options-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .option-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .img-box {
+            width: 100px;
+            height: 100px;
+            border: 3px dashed #ffb7b2;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff0f5;
+        }
+
+        .img-placeholder {
+            font-size: 0.7rem;
+            color: #aa999f;
+        }
+
+        .btn-option {
+            font-family: 'Mali', cursive, sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            background: #ff9aa2;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 154, 162, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .option-card:hover .btn-option {
+            transform: scale(1.08);
+        }
+
+        /* Thông báo Đúng / Sai */
+        .feedback-box {
+            font-size: 2rem;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+        .correct-text { color: #2ecc71; }
+        .wrong-text { color: #e74c3c; }
+
+        /* Kết quả */
+        .result-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ff6b81;
+            margin-bottom: 10px;
+        }
+        .result-desc {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <!-- 1. MÀN HÌNH KHỞI TẠO -->
+        <div id="screen-loading" class="screen active">
+            <div id="greeting-box" class="greeting-text" style="display: none;"></div>
+            <div id="loading-title" class="loading-text">Đang khởi tạo...</div>
+            <div class="dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+
+        <!-- 2. MÀN HÌNH NÚT BẮT ĐẦU -->
+        <div id="screen-start" class="screen">
+            <button class="btn-cute" onclick="goToNameScreen()">Bắt đầu</button>
+        </div>
+
+        <!-- 3. MÀN HÌNH NHẬP TÊN -->
+        <div id="screen-name" class="screen">
+            <div class="question-title">Bạn tên là gì nè? ✨</div>
+            <input type="text" id="username" class="name-input" placeholder="Nhập tên vào đây..." autocomplete="off">
+            <button class="btn-cute" onclick="submitName()">Xác nhận</button>
+        </div>
+
+        <!-- 4. MÀN HÌNH CÂU HỎI QUIZ -->
+        <div id="screen-quiz" class="screen">
+            <div id="q-title" class="question-title">Câu 1: ...</div>
+            <div class="options-container" id="q-options">
+                <!-- Nút lựa chọn sẽ được render tự động bằng Javascript -->
+            </div>
+        </div>
+
+        <!-- 5. MÀN HÌNH THÔNG BÓNG ĐÚNG / SAI (1 GIÂY) -->
+        <div id="screen-feedback" class="screen">
+            <div id="fb-text" class="feedback-box"></div>
+        </div>
+
+        <!-- 6. MÀN HÌNH KẾT QUẢ CUỐI CÙNG -->
+        <div id="screen-result" class="screen">
+            <div class="result-title">Kết quả của bạn 🎉</div>
+            <div id="result-content" class="result-desc"></div>
+        </div>
+    </div>
+
+    <script>
+        let myScore = 0; // Điểm số
+        let userName = "";
+        let currentQuestionIndex = 0;
+
+        // Danh sách 5 câu hỏi (correctAnswer: 'yes' là Cò, 'no' là Không)
+        const questions = [
+            {
+                title: "Câu 1: tên tôi là j?",
+                correct: "yes",
+                correctText: "nguyên",
+                wrongText: "đéo bt",
+                correctImg: "nguyên",
+                wrongImg: "không biết"
+            },
+            {
+                title: "Câu 2: tôi thích đọc truyện hay chơi game?",
+                correct: "yes",
+                correctText: "game",
+                wrongText: "truyện",
+                correctImg: "game",
+                wrongImg: "truyện"
+            },
+            {
+                title: "Câu 3: Tôi có hay thức khuya chơi game không?",
+                correct: "yes",
+                correctText: "Có",
+                wrongText: "Không",
+                correctImg: "có Thức Khuya",
+                wrongImg:  "ko thức khuya"
+            },
+            {
+                title: "Câu 4: bạn bt sinh nhật tôi là ngày nào ko?",
+                correct: "no",
+                correctText: "3/17",
+                wrongText: "5/8",
+                correctImg: "3/17",
+                wrongImg: "5/8"
+            },
+            {
+                title: "Câu 5: chúng ta quen được bao lâu rồi?",
+                correct: "yes",
+                correctText: "1 năm rưỡi",
+                wrongText: "1 năm",
+                correctImg: "1 năm rưỡi",
+                wrongImg: "1 năm"
+            }
+        ];
+
+        // Chạy 1.3s đầu tiên rồi hiện nút Bắt đầu
+        setTimeout(() => {
+            switchScreen('screen-loading', 'screen-start');
+        }, 1300);
+
+        function goToNameScreen() {
+            switchScreen('screen-start', 'screen-name');
+        }
+
+        function submitName() {
+            const inputVal = document.getElementById('username').value.trim();
+            if (inputVal === "") {
+                alert("Ní ơi, nhập tên vào đã chứ!");
+                return;
+            }
+            userName = inputVal;
+
+            const screenName = document.getElementById('screen-name');
+            const screenLoading = document.getElementById('screen-loading');
+            const greetingBox = document.getElementById('greeting-box');
+            const loadingTitle = document.getElementById('loading-title');
+
+            screenName.classList.add('fade-out');
+            setTimeout(() => {
+                screenName.classList.remove('active', 'fade-out');
+                screenName.style.display = 'none';
+
+                greetingBox.innerText = "Chào " + userName + " dễ thương nha! 💕";
+                greetingBox.style.display = "block";
+                loadingTitle.innerText = "Đang khởi tạo...";
+
+                screenLoading.style.display = 'flex';
+                setTimeout(() => {
+                    screenLoading.classList.add('active');
+                }, 50);
+
+                // Sau 1.3s chuyển vào câu hỏi đầu tiên
+                setTimeout(() => {
+                    greetingBox.style.display = "none"; // ẩn câu chào cho gọn màn hình câu hỏi
+                    loadQuestion(0);
+                    switchScreen('screen-loading', 'screen-quiz');
+                }, 1300);
+
+            }, 400);
+        }
+
+        // Tải câu hỏi lên màn hình (tự động hoán đổi vị trí trái/phải ngẫu nhiên)
+        function loadQuestion(index) {
+            currentQuestionIndex = index;
+            const q = questions[index];
+            document.getElementById('q-title').innerText = q.title;
+
+            const optionsContainer = document.getElementById('q-options');
+            optionsContainer.innerHTML = "";
+
+            // Tạo cấu trúc dữ liệu cho 2 lựa chọn
+            let options = [
+                { type: q.correct, text: q.correctText, img: q.correctImg },
+                { type: q.wrong, text: q.wrongText, img: q.wrongImg }
+            ];
+
+            // Random hoán đổi vị trí trái / phải ngẫu nhiên để không bị 1 bên hết
+            if (Math.random() < 0.5) {
+                options.reverse();
+            }
+
+            // Render HTML ra màn hình
+            options.forEach(opt => {
+                optionsContainer.innerHTML += `
+                    <div class="option-card" onclick="answerQuiz('${opt.type}')">
+                        <div class="img-box">
+                            <span class="img-placeholder">${opt.img}</span>
+                        </div>
+                        <button class="btn-option">${opt.text}</button>
+                    </div>
+                `;
+            });
+        }
+
+        // Xử lý khi chọn câu trả lời
+        function answerQuiz(choice) {
+            const currentQ = questions[currentQuestionIndex];
+            const feedbackText = document.getElementById('fb-text');
+            const screenQuiz = document.getElementById('screen-quiz');
+            const screenFb = document.getElementById('screen-feedback');
+
+            // Kiểm tra đúng / sai (+1 điểm nếu đúng, -1 điểm nếu sai)
+            if (choice === currentQ.correct) {
+                myScore += 1;
+                feedbackText.innerText = "Đúng rồi! ✨";
+                feedbackText.className = "feedback-box correct-text";
+            } else {
+                feedbackText.innerText = "Sai rồi! 😢";
+                feedbackText.className = "feedback-box wrong-text";
+            }
+
+            // Chuyển sang màn hình thông báo Đúng/Sai trong 1 giây
+            screenQuiz.classList.add('fade-out');
+            setTimeout(() => {
+                screenQuiz.classList.remove('active', 'fade-out');
+                screenQuiz.style.display = 'none';
+
+                screenFb.style.display = 'flex';
+                setTimeout(() => { screenFb.classList.add('active'); }, 50);
+
+                // Sau 1 giây: kiểm tra còn câu hỏi tiếp ko hay sang kết quả
+                setTimeout(() => {
+                    screenFb.classList.add('fade-out');
+                    setTimeout(() => {
+                        screenFb.classList.remove('active', 'fade-out');
+                        screenFb.style.display = 'none';
+
+                        let nextIndex = currentQuestionIndex + 1;
+                        if (nextIndex < questions.length) {
+                            // Chuyển câu hỏi tiếp theo
+                            loadQuestion(nextIndex);
+                            screenQuiz.style.display = 'flex';
+                            setTimeout(() => { screenQuiz.classList.add('active'); }, 50);
+                        } else {
+                            // Hết câu hỏi -> Hiện màn hình tính điểm
+                            showResultLoading();
+                        }
+                    }, 400);
+                }, 1000); // Dừng 1s thông báo đúng/sai
+
+            }, 400);
+        }
+
+        // Màn hình đang tính điểm
+        function showResultLoading() {
+            const screenLoading = document.getElementById('screen-loading');
+            const loadingTitle = document.getElementById('loading-title');
+            
+            loadingTitle.innerText = "Đang tính điểm...";
+            screenLoading.style.display = 'flex';
+            setTimeout(() => { screenLoading.classList.add('active'); }, 50);
+
+            // Đợi 1.5s rồi hiện kết quả phân loại
+            setTimeout(() => {
+                screenLoading.classList.add('fade-out');
+                setTimeout(() => {
+                    screenLoading.classList.remove('active', 'fade-out');
+                    screenLoading.style.display = 'none';
+
+                    renderFinalResult();
+                    const screenResult = document.getElementById('screen-result');
+                    screenResult.style.display = 'flex';
+                    setTimeout(() => { screenResult.classList.add('active'); }, 50);
+                }, 400);
+            }, 1500);
+        }
+
+        // Phân loại kết quả dựa theo điểm số
+        function renderFinalResult() {
+            const resultContent = document.getElementById('result-content');
+            let rankTitle = "";
+            let rankDesc = "";
+
+            if (myScore < 2) {
+                rankTitle = "💔 Fake Friend cmnr!";
+                rankDesc = `Điểm số của bạn: <b>${myScore} điểm</b>.<br>Trời ơi ở bên nhau từng này mà không hiểu gì về tui hết trơn á!`;
+            } else if (myScore === 2) {
+                rankTitle = "🤝 Bạn thường ổn áp!";
+                rankDesc = `Điểm số của bạn: <b>${myScore} điểm</b>.<br>Cũng khá hiểu chuyện đấy, tạm duyệt làm bạn bình thường nha!`;
+            } else {
+                rankTitle = "👑 Bạn Cốt chân ái!";
+                rankDesc = `Điểm số của bạn: <b>${myScore} điểm</b>.<br> đỉnh quá ní ơi, đúng là bạn cốt cứng nhắc không lệch đi đâu được! 💕`;
+            }
+
+            resultContent.innerHTML = `<b>${userName}</b> ơi!<br>${rankDesc}<br><br><span style="font-size: 1.1rem; color: #ff6b81;">${rankTitle}</span>`;
+        }
+
+        // Hàm chuyển màn hình mượt mà
+        function switchScreen(hideId, showId) {
+            const hideEl = document.getElementById(hideId);
+            const showEl = document.getElementById(showId);
+
+            hideEl.classList.add('fade-out');
+            setTimeout(() => {
+                hideEl.classList.remove('active', 'fade-out');
+                hideEl.style.display = 'none';
+
+                showEl.style.display = 'flex';
+                setTimeout(() => {
+                    showEl.classList.add('active');
+                }, 50);
+            }, 400);
+        }
+    </script>
+
+</body>
+</html>
